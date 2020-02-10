@@ -6,7 +6,7 @@ const Discord = require('discord.js');
 
 const VERSION = '1.0.0';
 
-function Bot(prefix = '!', modPrefix = '!'){
+function Bot(prefix = '!'){
     let bot = this;
     
     bot.VERSION = VERSION;
@@ -18,8 +18,6 @@ function Bot(prefix = '!', modPrefix = '!'){
     
     bot.prefix = prefix;
     bot.defaultPrefix = bot.prefix;
-    bot.modPrefix = modPrefix;
-    bot.modDefaultPrefix = bot.modPrefix;
     bot.color = 0xf03484;
     
     bot.commands = require('./commands.js')(bot);
@@ -40,16 +38,14 @@ function Bot(prefix = '!', modPrefix = '!'){
     
     client.on('message', message => {
         
-        let context = message.content.startsWith(bot.modPrefix) ? 'mod' : 'normal';
-        
-        let selfMentioned = !!message.mentions.users.get(client.user.id);
-        if(!message.content.startsWith(bot.prefix) && !message.content.startsWith(bot.modPrefix) && !selfMentioned){
+        let selfMentioned = !!message.mentions.users.get(client.user.id) && message.content.trim().match(bot.USERS_PATTERN).index === 0;
+        if(!selfMentioned && !message.content.startsWith(bot.prefix)){
             return;
         }
         
         let params = bot.getParams(message.content, selfMentioned);
         
-        bot.call(message, params, context);
+        bot.call(message, params);
         
     });
     
@@ -90,14 +86,14 @@ function Bot(prefix = '!', modPrefix = '!'){
         }
     }
     
-    bot.call = (message, params, context) => {
+    bot.call = (message, params) => {
         let name = params[0].toLowerCase(),
             m = Object.keys(bot.commands);
         for(let i = 0; i < m.length; i++){
             let command = bot.commands[m[i]];
             if(command.aliases.includes(name)){
                 if(bot.rights.check(message.member, command.rights)){
-                    command.call(message, params, context);
+                    command.call(message, params);
                 } else {
                     bot.deny(message, `insufficient rights. must be \`${command.rights}\` or higher`);
                 }
@@ -144,6 +140,21 @@ function Bot(prefix = '!', modPrefix = '!'){
                 if(!show){
                     message.awaitReactions((r, user) => !user.bot && r.emoji.name === '⚠', {max: 1}).then(collected => {
                         bot.send(message, error);
+                    });
+                }
+            }).catch(console.error);
+        }
+    }
+    
+    bot.info = (message, body, emoji, show = false) => {
+        if(show && body){
+            bot.send(message, body);
+        }
+        if(message){
+            message.react(emoji).then((reaction) => {
+                if(!show && body){
+                    message.awaitReactions((r, user) => !user.bot && r.emoji.name === emoji, {max: 1}).then(collected => {
+                        bot.send(message, body);
                     });
                 }
             }).catch(console.error);
