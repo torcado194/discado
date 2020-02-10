@@ -23,8 +23,7 @@ module.exports = (bot) => {
         let sections = [
             {
                 name: 'description',
-                value: 'inageBot is a meedia bot for making funy inages and other shit.'
-                + '\n use `' + bot.prefix + 'command` to run a command'
+                value: 'bot description'
             }
         ]
         
