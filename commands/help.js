@@ -66,7 +66,7 @@ module.exports = (bot) => {
                 });
                 let segments = bot.longMessage({embed:{
                     author: {
-                        name: `inageBot version ${bot.VERSION}`,
+                        name: `version ${bot.VERSION}`,
                         iconURL: bot.client.user.avatarURL || undefined
                     },
                     description: sections.find(s => s.name === 'description').value,
