@@ -38,6 +38,10 @@ function Bot(prefix = '!'){
     
     client.on('message', message => {
         
+        if(message.author.bot){
+            return;
+        }
+        
         let selfMentioned = !!message.mentions.users.get(client.user.id) && message.content.trim().match(bot.USERS_PATTERN).index === 0;
         if(!selfMentioned && !message.content.startsWith(bot.prefix)){
             return;
